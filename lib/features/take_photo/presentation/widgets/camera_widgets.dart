@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 
-/// Widget that return a bottom sheet, scrap data from [Photo] and show them.
+/// Widget that return a bottom sheet, scrap data from [Photo] and show them,then pop after 3 second.
 void showDetailsPopup(BuildContext context, Photo photo) {
 
   showModalBottomSheet(
