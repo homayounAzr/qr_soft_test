@@ -44,7 +44,7 @@ class _GalleryHomeState extends State<GalleryHome> with WidgetsBindingObserver {
             }
             if (state is GalleryReady) {
               return GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
                   itemCount: state.photos.length,
                   padding: const EdgeInsets.all(10),
                   itemBuilder: (context, index) {

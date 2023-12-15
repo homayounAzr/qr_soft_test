@@ -22,6 +22,7 @@ class CameraError extends CameraState {
 class PhotoReady extends CameraState {
   final CameraController controller;
   final XFile photo;
+  final Uint8List? image;
 
-  PhotoReady(this.photo, this.controller);
+  PhotoReady(this.image, this.photo, this.controller);
 }
