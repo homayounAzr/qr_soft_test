@@ -188,8 +188,9 @@ class _CameraHomeState extends State<CameraHome> with WidgetsBindingObserver {
                                       InkWell(
                                           onTap: () =>  Navigator.push(context, MaterialPageRoute(builder: (context) => const GalleryHome())),
                                           child: SizedBox(width: 100, height: 80,
-                                              child: state.image!=null? Image.memory(state.image!,width: 100,height: 100,fit: BoxFit.cover,):
-                                              Image.file(File(state.photo.path)))),
+                                              child: Image.memory(state.image!,width: 100,height: 100,fit: BoxFit.cover,),
+                                          ),
+                                      ),
                                     ],
                                   ),
                                   _buildSlider('Contrast', _contrast, (value) => setState(() => _contrast = value)),
@@ -199,6 +200,10 @@ class _CameraHomeState extends State<CameraHome> with WidgetsBindingObserver {
                                   _buildSlider('Sepia', _sepia, (value) => setState(() => _sepia = value)),
                                 ],
                               ),
+                            ),
+                            Align(
+                              alignment: Alignment.topCenter,
+                              child: Text(state.time??'_', style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.black,fontSize: 30),),
                             ),
                           ],
                         )

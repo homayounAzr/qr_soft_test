@@ -21,8 +21,8 @@ class CameraError extends CameraState {
 /// also change the app state to user be able to navigate to gallery page.
 class PhotoReady extends CameraState {
   final CameraController controller;
-  final XFile photo;
   final Uint8List? image;
+  final String? time;
 
-  PhotoReady(this.image, this.photo, this.controller);
+  PhotoReady(this.image, this.controller,this.time);
 }
