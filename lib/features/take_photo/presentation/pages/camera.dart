@@ -15,9 +15,10 @@ class CameraHome extends StatefulWidget {
 /// _CameraHomeState using WidgetsBindingObserver to detect when the app is in foreground or background.
 class _CameraHomeState extends State<CameraHome> with WidgetsBindingObserver {
   late CameraBloc _cameraBloc;
-  bool _showCrop = false;
+  bool _cropMode = false;
+  bool _focusMode = false;
   Offset? _startPoint = const Offset(0, 0);
-  Offset? _endPoint=const Offset(0, 0);
+  Offset? _endPoint = const Offset(0, 0);
   double _contrast = 0.0;
   double _brightness = 0.0;
   double _saturation = 0.0;
@@ -90,21 +91,42 @@ class _CameraHomeState extends State<CameraHome> with WidgetsBindingObserver {
                       children: [
                         MaterialApp(
                           home: ColorFiltered(
-                            colorFilter: CustomColorMatrixFilter.adjustAll(contrast: _contrast,saturation: _saturation,brightness: _brightness,hue: _hue,sepia: _sepia),
+                            colorFilter: CustomColorMatrixFilter.adjustAll(
+                                contrast: _contrast,
+                                saturation: _saturation,
+                                brightness: _brightness,
+                                hue: _hue,
+                                sepia: _sepia),
                             child: CameraPreview(state.controller),
                           ),
                         ),
-                        _showCrop ? SizedBox(
-                          height: 600,
-                          width: 500,
-                          child: DrawingOverlay(
-                            startPoint: _startPoint,
-                            endPoint: _endPoint,
-                            onStartDrawing: _startDrawing,
-                            onUpdateDrawing: _updateDrawing,
-                            onEndDrawing: _endDrawing,
-                          ),
-                        ): Container(),
+                        _cropMode
+                            ? SizedBox(
+                                height: 600,
+                                width: 500,
+                                child: DrawingOverlay(
+                                  startPoint: _startPoint,
+                                  endPoint: _endPoint,
+                                  onStartDrawing: _startDrawing,
+                                  onUpdateDrawing: _updateDrawing,
+                                  onEndDrawing: _endDrawing,
+                                ),
+                              )
+                            : _focusMode
+                            ? LayoutBuilder(
+                            builder: (BuildContext context, BoxConstraints constraints) {
+                              return GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTapDown: (details) {
+                                  final offset = Offset(
+                                    details.localPosition.dx / constraints.maxWidth,
+                                    details.localPosition.dy / constraints.maxHeight,
+                                  );
+                                  _cameraBloc.add(ChangeFocus(focusOffset: offset));
+                                },
+                              );
+                            })
+                            : Container(),
                         Align(
                           alignment: Alignment.bottomCenter,
                           child: Column(
@@ -116,16 +138,49 @@ class _CameraHomeState extends State<CameraHome> with WidgetsBindingObserver {
                                   InkWell(
                                       onTap: () {
                                         setState(() {
-                                          _showCrop = true;
+                                          _cropMode = false;
+                                          _startPoint = _endPoint = null;
+                                          _focusMode = !_focusMode;
                                         });
                                       },
-                                      child: const SizedBox(width: 100, height: 80, child: Icon(Icons.crop,color: Colors.blue,))),
+                                      child: SizedBox(
+                                          width: 100,
+                                          height: 80,
+                                          child: Icon(
+                                            Icons.center_focus_strong_rounded,
+                                            color: _focusMode ? Colors.purpleAccent : Colors.blue,
+                                          ))),
+                                  InkWell(
+                                      onTap: () {
+                                        setState(() {
+                                          _focusMode = false;
+                                          _cropMode = !_cropMode;
+                                          _startPoint = _endPoint = null;
+                                        });
+                                      },
+                                      child: SizedBox(
+                                          width: 100,
+                                          height: 80,
+                                          child: Icon(
+                                            Icons.crop,
+                                            color: _cropMode ? Colors.purpleAccent : Colors.blue,
+                                          ))),
                                   IconButton(
-                                      icon: const Icon(Icons.camera_alt,size: 40,color: Colors.blue,),
-                                      onPressed: () => _cameraBloc.add(
-                                          TakePhoto(start: _startPoint, end: _endPoint,context: context,contrast: _contrast, brightness: _brightness, saturation: _saturation, hue: _hue, sepia: _sepia,)
-                                      )
-                                  ),
+                                      icon: const Icon(
+                                        Icons.camera_alt,
+                                        size: 40,
+                                        color: Colors.blue,
+                                      ),
+                                      onPressed: () => _cameraBloc.add(TakePhoto(
+                                            start: _startPoint,
+                                            end: _endPoint,
+                                            context: context,
+                                            contrast: _contrast,
+                                            brightness: _brightness,
+                                            saturation: _saturation,
+                                            hue: _hue,
+                                            sepia: _sepia,
+                                          ))),
                                 ],
                               ),
                               _buildSlider('Contrast', _contrast, (value) => setState(() => _contrast = value)),
@@ -147,51 +202,115 @@ class _CameraHomeState extends State<CameraHome> with WidgetsBindingObserver {
                     Expanded(
                         child: Stack(
                           children: [
-                            MaterialApp(
-                              home: ColorFiltered(
-                                colorFilter: CustomColorMatrixFilter.adjustAll(contrast: _contrast,saturation: _saturation,brightness: _brightness,hue: _hue,sepia: _sepia),
-                                child: CameraPreview(state.controller),
-                              ),
-                            ),
-                            _showCrop ? SizedBox(
-                              height: 600,
-                              width: 500,
-                              child: DrawingOverlay(
-                                startPoint: _startPoint,
-                                endPoint: _endPoint,
-                                onStartDrawing: _startDrawing,
-                                onUpdateDrawing: _updateDrawing,
-                                onEndDrawing: _endDrawing,
-                              ),
-                            ): Container(),
+                        MaterialApp(
+                          home: ColorFiltered(
+                            colorFilter: CustomColorMatrixFilter.adjustAll(
+                                contrast: _contrast,
+                                saturation: _saturation,
+                                brightness: _brightness,
+                                hue: _hue,
+                                sepia: _sepia),
+                            child: CameraPreview(state.controller),
+                          ),
+                        ),
+                        _cropMode
+                            ? SizedBox(
+                                height: 600,
+                                width: 500,
+                                child: DrawingOverlay(
+                                  startPoint: _startPoint,
+                                  endPoint: _endPoint,
+                                  onStartDrawing: _startDrawing,
+                                  onUpdateDrawing: _updateDrawing,
+                                  onEndDrawing: _endDrawing,
+                                ),
+                              )
+                            : _focusMode
+                                ? LayoutBuilder(
+                                    builder: (BuildContext context, BoxConstraints constraints) {
+                                    return GestureDetector(
+                                      behavior: HitTestBehavior.opaque,
+                                      onTapDown: (details) {
+                                        final offset = Offset(
+                                          details.localPosition.dx / constraints.maxWidth,
+                                          details.localPosition.dy / constraints.maxHeight,
+                                        );
+                                        _cameraBloc.add(ChangeFocus(focusOffset: offset));
+                                      },
+                                    );
+                                  })
+                                : Container(),
                             Align(
-                              alignment: Alignment.bottomCenter,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
+                          alignment: Alignment.bottomCenter,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                 children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      InkWell(
-                                          onTap: () {
-                                            setState(() {
-                                              _showCrop = true;
-                                            });
-                                          },
-                                          child: const SizedBox(width: 100, height: 80, child: Icon(Icons.crop,color: Colors.blue,))),
-                                      IconButton(
-                                          icon: const Icon(Icons.camera_alt,size: 40,color: Colors.blue,),
-                                          onPressed: () => _cameraBloc.add(
-                                              TakePhoto(start: _startPoint, end: _endPoint,context: context,contrast: _contrast, brightness: _brightness, saturation: _saturation, hue: _hue, sepia: _sepia,)
-                                          )
+                                  InkWell(
+                                      onTap: () {
+                                        setState(() {
+                                          _cropMode = false;
+                                          _startPoint = _endPoint = null;
+                                          _focusMode = !_focusMode;
+                                        });
+                                      },
+                                      child: SizedBox(
+                                          width: 100,
+                                          height: 80,
+                                          child: Icon(
+                                            Icons.center_focus_strong_rounded,
+                                            color: _focusMode ? Colors.purpleAccent : Colors.blue,
+                                          ))),
+                                  InkWell(
+                                      onTap: () {
+                                        setState(() {
+                                          _focusMode = false;
+                                          _cropMode = !_cropMode;
+                                          _startPoint = _endPoint = null;
+                                        });
+                                      },
+                                      child: SizedBox(
+                                          width: 100,
+                                          height: 80,
+                                          child: Icon(
+                                            Icons.crop,
+                                            color: _cropMode ? Colors.purpleAccent : Colors.blue,
+                                          ))),
+                                  IconButton(
+                                      icon: const Icon(
+                                        Icons.camera_alt,
+                                        size: 40,
+                                        color: Colors.blue,
                                       ),
-                                      InkWell(
-                                          onTap: () =>  Navigator.push(context, MaterialPageRoute(builder: (context) => const GalleryHome())),
-                                          child: SizedBox(width: 100, height: 80,
-                                              child: Image.memory(state.image!,width: 100,height: 100,fit: BoxFit.cover,),
-                                          ),
+                                      onPressed: () => _cameraBloc.add(TakePhoto(
+                                            start: _startPoint,
+                                            end: _endPoint,
+                                            context: context,
+                                            contrast: _contrast,
+                                            brightness: _brightness,
+                                            saturation: _saturation,
+                                            hue: _hue,
+                                            sepia: _sepia,
+                                          ))),
+                                  InkWell(
+                                    onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => const GalleryHome())),
+                                    child: SizedBox(
+                                      width: 100,
+                                      height: 80,
+                                      child: Image.memory(
+                                        state.image!,
+                                        width: 100,
+                                        height: 100,
+                                        fit: BoxFit.cover,
                                       ),
-                                    ],
+                                    ),
+                                  ),
+                                ],
                                   ),
                                   _buildSlider('Contrast', _contrast, (value) => setState(() => _contrast = value)),
                                   _buildSlider('Saturation', _saturation, (value) => setState(() => _saturation = value)),

@@ -25,6 +25,7 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
     on<CameraInitialized>(_onInitialized);
     on<CameraDispose>(_onDispose);
     on<TakePhoto>(_onTakePhoto);
+    on<ChangeFocus>(_onChangeFocus);
   }
 
   final CameraController _controller = CameraController(
@@ -142,9 +143,22 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
 
       // Share.shareFiles([picture.path]);
         emit(PhotoReady(croppedBytes, _controller, DateTime.now().difference(startDate).inMilliseconds.toString()));
+        if(widthRatio == null || heightRatio == null){
+        var originalImage = await decodeImageFromList(File(picture.path).readAsBytesSync());
+        widthRatio = originalImage.width / MediaQuery.of((event.context!)).size.width;
+        heightRatio =  originalImage.height / MediaQuery.of((event.context!)).size.height;
+      }
     } on CameraException catch (e) {
       print(e.description);
-      return null;
+    }
+  }
+
+  void _onChangeFocus(ChangeFocus event, Emitter<CameraState> emit ) async {
+    try {
+      _controller.setFocusPoint(event.focusOffset);
+      _controller.setExposurePoint(event.focusOffset);
+    }on CameraException catch (e){
+      print(e);
     }
   }
 }

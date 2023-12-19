@@ -17,3 +17,9 @@ class TakePhoto extends CameraEvent {
   final double sepia;
   TakePhoto({this.start, this.end, this.context, required this.contrast, required this.brightness, required this.saturation, required this.hue, required this.sepia});
 }
+
+class ChangeFocus extends CameraEvent {
+  Offset focusOffset;
+  ChangeFocus({required this.focusOffset});
+
+}
