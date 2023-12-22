@@ -125,8 +125,8 @@ class _CameraHomeState extends State<CameraHome> with WidgetsBindingObserver {
                                 onEndDrawing: _endDrawing,
                               ),
                             )
-                                : _focusMode
-                                ? LayoutBuilder(
+                              : _focusMode
+                              ? LayoutBuilder(
                                 builder: (BuildContext context, BoxConstraints constraints) {
                                   return GestureDetector(
                                     behavior: HitTestBehavior.opaque,
@@ -135,13 +135,12 @@ class _CameraHomeState extends State<CameraHome> with WidgetsBindingObserver {
                                         details.localPosition.dx / constraints.maxWidth,
                                         details.localPosition.dy / constraints.maxHeight,
                                       );
-                                      print(offset);
                                       _cameraBloc.add(ChangeFocus(focusOffset: offset));
                                     },
                                   );
                                 })
-                                : Container(),
-                            Align(
+                              : Container(),
+                          Align(
                               alignment: Alignment.bottomCenter,
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
@@ -205,8 +204,8 @@ class _CameraHomeState extends State<CameraHome> with WidgetsBindingObserver {
                                 ],
                               ),
                             ),
-                          ],
-                        ),
+                        ],
+                      ),
                     ),
                   ],
                 );

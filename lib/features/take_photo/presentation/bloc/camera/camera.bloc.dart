@@ -32,9 +32,9 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
     /// This property give ability to move between front and back camera.
     /// For now we don't need it so just set to back camera that we detect it in [cameras].
     cameras.firstWhere((element) => element.lensDirection == CameraLensDirection.back),
-    ResolutionPreset.max,
+    ResolutionPreset.ultraHigh,
     enableAudio: false,
-    imageFormatGroup: ImageFormatGroup.yuv420,
+    imageFormatGroup: ImageFormatGroup.jpeg,
   );
   PhotoRepository photoRepository = PhotoRepositoryImpl(LocalDBPhotoDataSource(databaseConnection: DatabaseConnection()));
 
@@ -43,7 +43,6 @@ class CameraBloc extends Bloc<CameraEvent, CameraState> {
     try {
       await _controller.initialize();
       _controller.setDescription(cameras.firstWhere((element) => element.lensDirection == CameraLensDirection.back));
-
       emit(CameraReady(_controller));
     } catch (e) {
       emit(CameraError(e.toString()));
